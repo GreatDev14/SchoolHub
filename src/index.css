@@ -1,0 +1,352 @@
+/* School Hub Design System & Global Styles */
+:root {
+  --primary-navy: #17243A;
+  --primary-navy-dark: #0F172A;
+  --primary-navy-light: #243552;
+  
+  --accent-blue: #356AE6;
+  --accent-blue-hover: #2655C4;
+  --accent-blue-soft: #EEF3FE;
+  --accent-blue-border: #D3E0FB;
+
+  --bg-page: #F6F8FC;
+  --bg-card: #FFFFFF;
+  --bg-card-subtle: #F8FAFD;
+  --bg-elevated: #FFFFFF;
+
+  --text-main: #1F2937;
+  --text-secondary: #667085;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+
+  /* Master Spec Tokens */
+  --color-primary: #17243A;
+  --color-accent: #356AE6;
+  --color-background: #F6F8FC;
+  --color-surface: #FFFFFF;
+  --color-text: #1F2937;
+  --color-muted: #667085;
+  --color-border: #E5EAF1;
+  --radius-card: 14px;
+  --radius-control: 10px;
+  --shadow-card: 0 4px 18px rgba(23, 36, 58, 0.06);
+
+  --color-success: #16845B;
+  --color-success-bg: #E8F5EE;
+  --color-success-border: #C1E6D3;
+
+  --color-warning: #B7791F;
+  --color-warning-bg: #FEF7EA;
+  --color-warning-border: #F7DFB0;
+
+  --color-danger: #D9383A;
+  --color-danger-bg: #FEEEEE;
+  --color-danger-border: #F8C3C4;
+
+  --color-info: #0284C7;
+  --color-info-bg: #E0F2FE;
+
+  --border-light: #E5EAF1;
+  --border-subtle: #EEF2F6;
+  --border-focus: #356AE6;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.07), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.09), 0 4px 10px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 20px 38px rgba(15, 23, 42, 0.12), 0 6px 14px rgba(15, 23, 42, 0.06);
+
+  --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sidebar-width: 260px;
+  --topbar-height: 68px;
+  --bottom-nav-height: 64px;
+  --transition-normal: 180ms ease-in-out;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Utility Classes */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
+  line-height: 1.25;
+  min-height: 42px;
+  user-select: none;
+}
+
+.btn-primary {
+  background-color: var(--accent-blue);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(53, 106, 230, 0.28);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-blue-hover);
+  box-shadow: 0 4px 12px rgba(53, 106, 230, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-card-subtle);
+  border-color: #D3DCE6;
+  color: var(--primary-navy);
+}
+
+.btn-navy {
+  background-color: var(--primary-navy);
+  color: #FFFFFF;
+}
+
+.btn-navy:hover {
+  background-color: var(--primary-navy-light);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  background-color: rgba(15, 23, 42, 0.05);
+  color: var(--text-main);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  min-height: 34px;
+}
+
+.btn-lg {
+  padding: 14px 26px;
+  font-size: 1rem;
+  min-height: 48px;
+  border-radius: var(--radius-md);
+}
+
+/* Badges & Tags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.badge-blue {
+  background-color: var(--accent-blue-soft);
+  color: var(--accent-blue);
+  border: 1px solid var(--accent-blue-border);
+}
+
+.badge-green {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
+}
+
+.badge-amber {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+.badge-red {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
+}
+
+.badge-neutral {
+  background-color: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
+}
+
+/* Cards */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+  border-color: #D3DFEE;
+}
+
+/* Modal Dialog */
+.modal-backdrop, .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 150ms ease-out;
+}
+
+.modal-container, .modal-content {
+  background-color: #FFFFFF;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-light);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: scaleUp 180ms ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-container.max-w-xl { max-width: 580px; }
+.modal-container.max-w-2xl { max-width: 680px; }
+.modal-container.max-w-3xl { max-width: 820px; }
+.modal-container.max-w-4xl { max-width: 960px; }
+
+.badge-purple {
+  background-color: #F3E8FF;
+  color: #7E22CE;
+  border: 1px solid #E9D5FF;
+}
+
+.badge-rose {
+  background-color: #FFE4E6;
+  color: #BE123C;
+  border: 1px solid #FECDD3;
+}
+
+/* Learning Hub Tabs & Layouts */
+.learning-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border-light);
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.learning-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.learning-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  border-radius: 8px 8px 0 0;
+  transition: all 140ms ease;
+  white-space: nowrap;
+}
+
+.learning-tab-btn:hover {
+  color: var(--primary-navy);
+  background-color: var(--bg-card-subtle);
+}
+
+.learning-tab-btn.active {
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
+  background-color: var(--accent-blue-soft);
+}
+
+/* Animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
