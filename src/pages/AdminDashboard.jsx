@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldAlert, CheckCircle2, Sparkles, Search, KeyRound, Flag, Check, X, PlusCircle } from 'lucide-react';
-export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, classCodes, contentReports, onApproveTeacherRequest, onDeclineTeacherRequest, onRevokeClassCode, onGenerateClassCode, onDismissReport, onActionReport, onSwitchRole, onNavigate }) => {
+import { ShieldAlert, CheckCircle2, Sparkles, Search, KeyRound, Flag, Check, X, PlusCircle, GraduationCap, Pencil, Trash2 } from 'lucide-react';
+import { SCHOOL_CLASS_GROUPS } from '../data/mockData';
+export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, classCodes, contentReports, classes, onApproveTeacherRequest, onDeclineTeacherRequest, onRevokeClassCode, onGenerateClassCode, onCreateClass, onUpdateClass, onDeleteClass, onDismissReport, onActionReport, onSwitchRole, onNavigate }) => {
     const [activeTab, setActiveTab] = useState('overview');
     const [roleFilter, setRoleFilter] = useState('all');
     const [searchUser, setSearchUser] = useState('');
@@ -8,6 +9,26 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
     const [newCodeName, setNewCodeName] = useState('');
     const [newCodeArm, setNewCodeArm] = useState('SS1 Dynamo');
     const [newCodeDesc, setNewCodeDesc] = useState('');
+    const [showClassModal, setShowClassModal] = useState(false);
+    const [editingClass, setEditingClass] = useState(null);
+    const [classForm, setClassForm] = useState({ name: '', code: '', classGroup: 'Primary 1', teacherName: '', room: '', schedule: '', studentCount: 30 });
+    const openCreateClass = () => {
+        setEditingClass(null);
+        setClassForm({ name: '', code: '', classGroup: 'Primary 1', teacherName: '', room: '', schedule: '', studentCount: 30 });
+        setShowClassModal(true);
+    };
+    const openEditClass = (cls) => {
+        setEditingClass(cls);
+        setClassForm({ name: cls.name, code: cls.code, classGroup: cls.classGroup, teacherName: cls.teacherName, room: cls.room, schedule: cls.schedule, studentCount: cls.studentCount || 30 });
+        setShowClassModal(true);
+    };
+    const handleSaveClass = (e) => {
+        e.preventDefault();
+        if (!classForm.name.trim() || !classForm.code.trim()) return;
+        if (editingClass) onUpdateClass({ ...editingClass, ...classForm, name: classForm.name.trim(), code: classForm.code.trim().toUpperCase(), studentCount: Number(classForm.studentCount) || 0 });
+        else onCreateClass({ ...classForm, name: classForm.name.trim(), code: classForm.code.trim().toUpperCase(), studentCount: Number(classForm.studentCount) || 0 });
+        setShowClassModal(false);
+    };
     const filteredUsers = adminUsers.filter(u => {
         const matchesRole = roleFilter === 'all' || u.role === roleFilter;
         const matchesSearch = u.name.toLowerCase().includes(searchUser.toLowerCase()) ||
@@ -40,41 +61,31 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
             backgroundColor: '#FFFFFF',
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--border-light)',
-            padding: '28px',
+            padding: '24px 28px',
             boxShadow: 'var(--shadow-xs)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '20px',
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #F5F3FF 100%)'
+            gap: '18px'
         }}>
         <div>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: '#EDE9FE',
-            color: '#6D28D9',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '0.74rem',
-            fontWeight: 700,
-            marginBottom: '8px'
-        }}>
-            <Sparkles size={13}/> Administration Console • Pilot Oversight
+          <div style={{ marginBottom: '8px' }}>
+            <span className="badge badge-purple">
+              Administration Console • Whole School
+            </span>
           </div>
           <h2 style={{
-            fontSize: '1.75rem',
+            fontSize: '1.65rem',
             fontWeight: 800,
-            color: 'var(--primary-navy)',
-            letterSpacing: '-0.03em',
+            color: 'var(--text-main)',
+            letterSpacing: '-0.02em',
             lineHeight: 1.2
         }}>
             Welcome, {userProfile.name}
           </h2>
-          <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Pilot oversight for <strong>SS1 Dynamo</strong> (32 Students) and <strong>SS1 Horizon</strong> (32 Students).
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            Manage classes, memberships, teachers, announcements, and school-wide operations across <strong>Primary and Secondary</strong> levels.
           </p>
         </div>
 
@@ -112,6 +123,7 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
             { id: 'overview', label: 'Overview & Metrics' },
             { id: 'teacher-requests', label: `Teacher Approvals ${pendingTeacherRequestsCount > 0 ? `(${pendingTeacherRequestsCount})` : ''}`, badge: pendingTeacherRequestsCount },
             { id: 'class-codes', label: `Class Codes (${classCodes.filter(c => c.status === 'Active').length} Active)` },
+            { id: 'classes', label: `School Classes (${classes.length})` },
             { id: 'moderation', label: `Content Reports ${pendingReportsCount > 0 ? `(${pendingReportsCount})` : ''}`, badge: pendingReportsCount },
             { id: 'directory', label: `User Directory (${adminUsers.length})` }
         ].map(tab => {
@@ -156,7 +168,7 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
 
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (<div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Pilot Scope Stats */}
+          {/* Whole-school stats */}
           <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -165,10 +177,10 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
             <div className="card">
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Enrolled Day Students</div>
               <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--primary-navy)', marginTop: '4px' }}>
-                64 Students
+                {classes.reduce((total, cls) => total + (Number(cls.studentCount) || 0), 0)} Students
               </div>
               <div style={{ fontSize: '0.74rem', color: 'var(--accent-blue)', fontWeight: 600, marginTop: '4px' }}>
-                SS1 Dynamo (32) + SS1 Horizon (32)
+                Across Primary and Secondary classes
               </div>
             </div>
 
@@ -203,45 +215,28 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
             </div>
           </div>
 
-          {/* Arms Breakdown Cards */}
+          {/* School-wide division breakdown */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
             <div className="card" style={{ borderLeft: '4px solid #356AE6' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span className="badge badge-blue">PILOT ARM 1</span>
+                <span className="badge badge-blue">PRIMARY SCHOOL</span>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-success)' }}>● Active</span>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-navy)' }}>
-                SS1 Dynamo
-              </h3>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Mathematics, Physical Sciences &amp; Humanities Focus
-              </p>
-              <div style={{
-                marginTop: '16px',
-                padding: '12px',
-                backgroundColor: 'var(--bg-card-subtle)',
-                borderRadius: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.8rem'
-            }}>
-                <span>Students: <strong>32 Day Students</strong></span>
-                <span>Active Subjects: <strong>6</strong></span>
-                <span>Code: <code style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>DYN-2026-MTH</code></span>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-navy)' }}>Primary 1–6</h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Language, numeracy, foundation science and social learning.</p>
+              <div style={{ marginTop: '16px', padding: '12px', backgroundColor: 'var(--bg-card-subtle)', borderRadius: '8px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+                <span>Class groups: <strong>Primary 1–6</strong></span>
+                <span>Managed classes: <strong>{classes.filter(cls => cls.classGroup.startsWith('Primary')).length}</strong></span>
               </div>
             </div>
 
             <div className="card" style={{ borderLeft: '4px solid #16845B' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span className="badge badge-green">PILOT ARM 2</span>
+                <span className="badge badge-green">SECONDARY SCHOOL</span>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-success)' }}>● Active</span>
               </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-navy)' }}>
-                SS1 Horizon
-              </h3>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Biological Sciences, Chemistry &amp; Social Sciences Focus
-              </p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-navy)' }}>JSS1–SS3</h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Junior and senior secondary subjects across all arms.</p>
               <div style={{
                 marginTop: '16px',
                 padding: '12px',
@@ -251,9 +246,8 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
                 justifyContent: 'space-between',
                 fontSize: '0.8rem'
             }}>
-                <span>Students: <strong>32 Day Students</strong></span>
-                <span>Active Subjects: <strong>6</strong></span>
-                <span>Code: <code style={{ color: 'var(--color-success)', fontWeight: 700 }}>HRZ-2026-BIO</code></span>
+                <span>Class groups: <strong>JSS1–SS3</strong></span>
+                <span>Managed classes: <strong>{classes.filter(cls => !cls.classGroup.startsWith('Primary')).length}</strong></span>
               </div>
             </div>
           </div>
@@ -320,6 +314,34 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
           </div>
         </div>)}
 
+      {/* TAB: SCHOOL-WIDE CLASS MANAGEMENT */}
+      {activeTab === 'classes' && (<div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary-navy)' }}>School Classes</h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Create and manage subjects across Primary and Secondary levels.</p>
+          </div>
+          <button onClick={openCreateClass} className="btn btn-primary btn-sm"><PlusCircle size={15}/> Add Class</button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+          {classes.map(cls => (<div key={cls.id} className="card" style={{ borderLeft: `4px solid ${cls.colorAccent || 'var(--accent-blue)'}`, boxShadow: 'none' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginBottom: '10px' }}>
+              <div><span className="badge badge-blue">{cls.classGroup}</span><h4 style={{ marginTop: '6px', fontWeight: 800, color: 'var(--primary-navy)' }}>{cls.name}</h4></div>
+              <code style={{ color: 'var(--text-muted)' }}>{cls.code}</code>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              <div>Teacher: <strong>{cls.teacherName || 'Unassigned'}</strong></div>
+              <div>Room: {cls.room || 'Not assigned'}</div>
+              <div>Students: {cls.studentCount || 0}</div>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
+              <button onClick={() => openEditClass(cls)} className="btn btn-secondary btn-sm"><Pencil size={14}/> Edit</button>
+              <button onClick={() => { if (window.confirm(`Remove ${cls.name} from ${cls.classGroup}?`)) onDeleteClass(cls.id); }} className="btn btn-secondary btn-sm" style={{ color: 'var(--color-danger)' }}><Trash2 size={14}/> Remove</button>
+            </div>
+          </div>))}
+        </div>
+      </div>)}
+
       {/* TAB 3: CLASS CODES & ENROLLMENT */}
       {activeTab === 'class-codes' && (<div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
@@ -328,7 +350,7 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
                 Class Codes &amp; Student Invitation Keys
               </h3>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                Manage school-issued entrance keys that allow students to join SS1 Dynamo and SS1 Horizon.
+                Manage school-issued entrance keys that allow students to join classes across the entire school.
               </p>
             </div>
             <button onClick={() => setShowGenerateCodeModal(true)} className="btn btn-primary btn-sm">
@@ -457,7 +479,7 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
                 Pilot User Directory ({filteredUsers.length} records)
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                Fictional accounts participating in the SS1 Dynamo &amp; SS1 Horizon pilot
+                Fictional accounts participating across school-wide class groups
               </p>
             </div>
 
@@ -542,6 +564,26 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
           </div>
         </div>)}
 
+      {/* School Class Create/Edit Modal */}
+      {showClassModal && (<div className="modal-overlay" onClick={() => setShowClassModal(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '560px', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-navy)' }}>{editingClass ? 'Edit School Class' : 'Add School Class'}</h3>
+            <button onClick={() => setShowClassModal(false)}><X size={18}/></button>
+          </div>
+          <form onSubmit={handleSaveClass} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+            <div className="form-group"><label className="form-label">Class / Subject Name</label><input required className="form-input" value={classForm.name} onChange={e => setClassForm({...classForm, name:e.target.value})} placeholder="e.g. Mathematics"/></div>
+            <div className="form-group"><label className="form-label">Subject Code</label><input required className="form-input" value={classForm.code} onChange={e => setClassForm({...classForm, code:e.target.value})} placeholder="e.g. MTH-SS1"/></div>
+            <div className="form-group"><label className="form-label">School Class</label><select className="form-select" value={classForm.classGroup} onChange={e => setClassForm({...classForm, classGroup:e.target.value})}>{SCHOOL_CLASS_GROUPS.map(group => <option key={group}>{group}</option>)}</select></div>
+            <div className="form-group"><label className="form-label">Student Count</label><input type="number" min="0" className="form-input" value={classForm.studentCount} onChange={e => setClassForm({...classForm, studentCount:e.target.value})}/></div>
+            <div className="form-group"><label className="form-label">Teacher</label><input className="form-input" value={classForm.teacherName} onChange={e => setClassForm({...classForm, teacherName:e.target.value})} placeholder="Teacher name"/></div>
+            <div className="form-group"><label className="form-label">Room</label><input className="form-input" value={classForm.room} onChange={e => setClassForm({...classForm, room:e.target.value})} placeholder="Room or classroom"/></div>
+            <div className="form-group" style={{ gridColumn: '1/-1' }}><label className="form-label">Schedule</label><input className="form-input" value={classForm.schedule} onChange={e => setClassForm({...classForm, schedule:e.target.value})} placeholder="Mon & Wed • 8:30 AM"/></div>
+            <div style={{ gridColumn: '1/-1', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}><button type="button" onClick={() => setShowClassModal(false)} className="btn btn-secondary btn-sm">Cancel</button><button type="submit" className="btn btn-primary btn-sm">{editingClass ? 'Save Changes' : 'Create Class'}</button></div>
+          </form>
+        </div>
+      </div>)}
+
       {/* Generate Class Code Modal Dialog */}
       {showGenerateCodeModal && (<div className="modal-overlay" onClick={() => setShowGenerateCodeModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px', padding: '24px' }}>
@@ -549,7 +591,7 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <KeyRound size={20} color="var(--accent-blue)"/>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary-navy)' }}>
-                  Issue New Pilot Class Code
+                  Issue New School Class Code
                 </h3>
               </div>
               <button onClick={() => setShowGenerateCodeModal(false)} style={{ color: 'var(--text-muted)' }}>
@@ -566,8 +608,7 @@ export const AdminDashboard = ({ userProfile, adminUsers, teacherRequests, class
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Target Class Arm</label>
                 <select className="form-select" value={newCodeArm} onChange={(e) => setNewCodeArm(e.target.value)}>
-                  <option value="SS1 Dynamo">SS1 Dynamo</option>
-                  <option value="SS1 Horizon">SS1 Horizon</option>
+                  {SCHOOL_CLASS_GROUPS.map(group => <option key={group} value={group}>{group}</option>)}
                 </select>
               </div>
 

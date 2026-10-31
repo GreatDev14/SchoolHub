@@ -1,234 +1,337 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Play, Pause, RotateCcw, RotateCw, Bookmark, CheckCircle2, Volume2, FileText, Sparkles } from 'lucide-react';
+
 export const AudioPlayerModal = ({ episode, isOpen, onClose, onToggleBookmark, onMarkCompleted }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
-    const [currentSeconds, setCurrentSeconds] = useState(0);
-    const [showTranscript, setShowTranscript] = useState(true);
-    useEffect(() => {
-        if (episode) {
-            setCurrentSeconds(episode.lastPositionSeconds || 0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
+  const [currentSeconds, setCurrentSeconds] = useState(0);
+  const [showTranscript, setShowTranscript] = useState(true);
+  const [isSpeechSupported, setIsSpeechSupported] = useState(true);
+  const utteranceRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.speechSynthesis) {
+      setIsSpeechSupported(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (episode) {
+      setCurrentSeconds(episode.lastPositionSeconds || 0);
+      setIsPlaying(false);
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [episode, isOpen]);
+
+  // Handle play/pause with Web Speech API
+  const handleTogglePlay = () => {
+    if (typeof window === 'undefined') return;
+
+    if (isPlaying) {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.pause();
+      }
+      setIsPlaying(false);
+    } else {
+      if (window.speechSynthesis) {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+          setIsPlaying(true);
+        } else {
+          window.speechSynthesis.cancel();
+          const textToSpeak = episode.transcript || episode.description || episode.title;
+          const utter = new SpeechSynthesisUtterance(textToSpeak);
+          utter.rate = playbackSpeed;
+          utter.pitch = 1.0;
+
+          utter.onboundary = (e) => {
+            if (e.charIndex && episode.durationMinutes) {
+              const fraction = e.charIndex / textToSpeak.length;
+              setCurrentSeconds(Math.round(fraction * (episode.durationMinutes * 60)));
+            }
+          };
+
+          utter.onend = () => {
             setIsPlaying(false);
+            setCurrentSeconds(episode.durationMinutes * 60);
+            onMarkCompleted(episode.id);
+          };
+
+          utter.onerror = () => {
+            setIsPlaying(false);
+          };
+
+          utteranceRef.current = utter;
+          window.speechSynthesis.speak(utter);
+          setIsPlaying(true);
         }
-    }, [episode]);
-    // Simulated playback timer
-    useEffect(() => {
-        let interval;
-        if (isPlaying && episode) {
-            const totalSeconds = episode.durationMinutes * 60;
-            interval = setInterval(() => {
-                setCurrentSeconds(prev => {
-                    if (prev >= totalSeconds) {
-                        setIsPlaying(false);
-                        onMarkCompleted(episode.id);
-                        return totalSeconds;
-                    }
-                    return Math.min(totalSeconds, prev + playbackSpeed);
-                });
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [isPlaying, playbackSpeed, episode]);
-    if (!isOpen || !episode)
-        return null;
-    const totalSeconds = episode.durationMinutes * 60;
-    const progressPercent = Math.min(100, (currentSeconds / totalSeconds) * 100);
-    const formatTime = (secs) => {
-        const m = Math.floor(secs / 60);
-        const s = Math.floor(secs % 60);
-        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
-    const handleSeek = (e) => {
-        const val = Number(e.target.value);
-        setCurrentSeconds((val / 100) * totalSeconds);
-    };
-    const skipSeconds = (delta) => {
-        setCurrentSeconds(prev => Math.max(0, Math.min(totalSeconds, prev + delta)));
-    };
-    const cycleSpeed = () => {
-        if (playbackSpeed === 1.0)
-            setPlaybackSpeed(1.25);
-        else if (playbackSpeed === 1.25)
-            setPlaybackSpeed(1.5);
-        else
-            setPlaybackSpeed(1.0);
-    };
-    return (<div className="modal-backdrop" onClick={onClose}>
+      } else {
+        // Fallback timer if speech synth not available
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const handleClose = () => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlaying(false);
+    onClose();
+  };
+
+  // Speed changer
+  const cycleSpeed = () => {
+    let nextSpeed = 1.0;
+    if (playbackSpeed === 1.0) nextSpeed = 1.25;
+    else if (playbackSpeed === 1.25) nextSpeed = 1.5;
+    else nextSpeed = 1.0;
+
+    setPlaybackSpeed(nextSpeed);
+    if (isPlaying && typeof window !== 'undefined' && window.speechSynthesis) {
+      // Re-speak with updated rate from current position
+      window.speechSynthesis.cancel();
+      const textToSpeak = episode.transcript || episode.description;
+      const utter = new SpeechSynthesisUtterance(textToSpeak);
+      utter.rate = nextSpeed;
+      utter.onend = () => {
+        setIsPlaying(false);
+        onMarkCompleted(episode.id);
+      };
+      utteranceRef.current = utter;
+      window.speechSynthesis.speak(utter);
+    }
+  };
+
+  if (!isOpen || !episode) return null;
+
+  const totalSeconds = (episode.durationMinutes || 5) * 60;
+  const progressPercent = Math.min(100, (currentSeconds / totalSeconds) * 100);
+
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const skipSeconds = (delta) => {
+    const next = Math.max(0, Math.min(totalSeconds, currentSeconds + delta));
+    setCurrentSeconds(next);
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={handleClose}>
       <div className="modal-container max-w-2xl" onClick={e => e.stopPropagation()} style={{ padding: 0, overflow: 'hidden' }}>
         {/* Header */}
         <div style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid var(--border-light)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: 'var(--bg-card-subtle)'
+          padding: '16px 20px',
+          borderBottom: '1px solid var(--border-light)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: 'var(--bg-card-subtle)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '10px',
-            backgroundColor: '#EEF2FF',
-            color: '#4F46E5',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-        }}>
-              <Volume2 size={20}/>
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--accent-blue-soft)',
+              color: 'var(--accent-blue)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid var(--accent-blue-border)'
+            }}>
+              <Volume2 size={18} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span className="badge badge-blue">{episode.subject}</span>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{episode.classGroup}</span>
-                <span className="badge badge-green" style={{ fontSize: '0.65rem' }}>Simulated Audio</span>
+                <span className="badge badge-green" style={{ fontSize: '0.68rem' }}>
+                  Live Speech Audio
+                </span>
               </div>
-              <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary-navy)', marginTop: '2px' }}>
+              <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '2px' }}>
                 {episode.title}
               </h2>
             </div>
           </div>
-          <button onClick={onClose} style={{ color: 'var(--text-muted)', padding: '6px' }}>
-            <X size={20}/>
+          <button onClick={handleClose} aria-label="Close audio player" style={{ color: 'var(--text-muted)', padding: '6px' }}>
+            <X size={18} />
           </button>
         </div>
 
         {/* Player Core Area */}
         <div style={{ padding: '24px 28px', backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--border-light)' }}>
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '18px' }}>
             <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '18px',
-            backgroundColor: 'var(--accent-blue)',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 10px auto',
-            boxShadow: '0 8px 20px rgba(53, 106, 230, 0.3)'
-        }}>
-              <Volume2 size={32}/>
+              width: '56px',
+              height: '56px',
+              borderRadius: '12px',
+              backgroundColor: 'var(--primary-navy)',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 10px auto',
+              boxShadow: 'var(--shadow-sm)'
+            }}>
+              {isPlaying ? (
+                <div className="audio-wave">
+                  <div className="audio-wave-bar" style={{ backgroundColor: '#FFFFFF' }} />
+                  <div className="audio-wave-bar" style={{ backgroundColor: '#FFFFFF' }} />
+                  <div className="audio-wave-bar" style={{ backgroundColor: '#FFFFFF' }} />
+                  <div className="audio-wave-bar" style={{ backgroundColor: '#FFFFFF' }} />
+                  <div className="audio-wave-bar" style={{ backgroundColor: '#FFFFFF' }} />
+                </div>
+              ) : (
+                <Volume2 size={24} />
+              )}
             </div>
-            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--primary-navy)' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-main)' }}>
               {episode.speakerTeacher}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               {episode.seriesTitle || 'Educational Audio Lesson'}
             </div>
           </div>
 
           {/* Progress bar */}
           <div style={{ marginBottom: '16px' }}>
-            <input type="range" min="0" max="100" value={progressPercent} onChange={handleSeek} style={{
-            width: '100%',
-            accentColor: 'var(--accent-blue)',
-            height: '6px',
-            cursor: 'pointer'
-        }}/>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)', marginTop: '4px' }}>
-              <span>{formatTime(currentSeconds)}</span>
-              <span>{formatTime(totalSeconds)}</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={progressPercent}
+              onChange={(e) => setCurrentSeconds((Number(e.target.value) / 100) * totalSeconds)}
+              style={{
+                width: '100%',
+                accentColor: 'var(--accent-blue)',
+                height: '6px',
+                cursor: 'pointer'
+              }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+              <span className="tabular-nums">{formatTime(currentSeconds)}</span>
+              <span className="tabular-nums">{formatTime(totalSeconds)}</span>
             </div>
           </div>
 
           {/* Controls Bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <button onClick={() => onToggleBookmark(episode.id)} className="btn btn-secondary btn-sm" style={{ color: episode.isBookmarked ? '#D97706' : 'inherit' }}>
-              <Bookmark size={14} style={{ fill: episode.isBookmarked ? '#D97706' : 'none' }}/>
+            <button
+              onClick={() => onToggleBookmark(episode.id)}
+              className="btn btn-secondary btn-sm"
+              style={{ color: episode.isBookmarked ? 'var(--color-warning)' : 'inherit' }}
+            >
+              <Bookmark size={14} style={{ fill: episode.isBookmarked ? 'var(--color-warning)' : 'none' }} />
               <span>{episode.isBookmarked ? 'Saved' : 'Save'}</span>
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button onClick={() => skipSeconds(-15)} className="btn btn-secondary btn-sm" title="Rewind 15s">
-                <RotateCcw size={16}/>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <button
+                onClick={() => skipSeconds(-15)}
+                className="btn btn-ghost btn-sm"
+                title="Rewind 15s"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <RotateCcw size={16} />
               </button>
 
-              <button onClick={() => setIsPlaying(!isPlaying)} className="btn btn-primary" style={{
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
-            padding: 0,
-            boxShadow: '0 4px 14px rgba(53, 106, 230, 0.4)'
-        }}>
-                {isPlaying ? <Pause size={22} style={{ fill: '#FFFFFF' }}/> : <Play size={22} style={{ fill: '#FFFFFF', marginLeft: '3px' }}/>}
+              <button
+                onClick={handleTogglePlay}
+                className="btn btn-primary"
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '50%',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                {isPlaying ? <Pause size={20} /> : <Play size={20} style={{ marginLeft: '2px' }} />}
               </button>
 
-              <button onClick={() => skipSeconds(15)} className="btn btn-secondary btn-sm" title="Forward 15s">
-                <RotateCw size={16}/>
+              <button
+                onClick={() => skipSeconds(15)}
+                className="btn btn-ghost btn-sm"
+                title="Fast forward 15s"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <RotateCw size={16} />
               </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button onClick={cycleSpeed} className="btn btn-secondary btn-sm" style={{ fontWeight: 800, minWidth: '46px' }}>
-                {playbackSpeed.toFixed(2).replace(/\.00$/, '')}x
-              </button>
-
-              <button onClick={() => onMarkCompleted(episode.id)} className="btn btn-secondary btn-sm" style={{ color: episode.isCompleted ? 'var(--color-success)' : 'inherit' }} title="Mark as completed">
-                <CheckCircle2 size={16}/>
-              </button>
-            </div>
+            <button
+              onClick={cycleSpeed}
+              className="btn btn-secondary btn-sm tabular-nums"
+              style={{ minWidth: '48px', fontWeight: 700 }}
+            >
+              {playbackSpeed}x
+            </button>
           </div>
         </div>
 
         {/* Transcript Section */}
-        <div style={{ padding: '20px 24px', backgroundColor: 'var(--bg-card-subtle)', maxHeight: '240px', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-              <FileText size={15} color="var(--accent-blue)"/>
-              <span>Lesson Transcript &amp; Key Concepts</span>
+        <div style={{ padding: '18px 24px', backgroundColor: 'var(--bg-page)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+              <FileText size={14} color="var(--accent-blue)" />
+              <span>Lesson Notes Transcript</span>
             </div>
-            <button onClick={() => setShowTranscript(!showTranscript)} style={{ fontSize: '0.75rem', color: 'var(--accent-blue)', fontWeight: 700 }}>
-              {showTranscript ? 'Collapse' : 'Expand'}
+            <button
+              onClick={() => setShowTranscript(!showTranscript)}
+              style={{ fontSize: '0.75rem', color: 'var(--accent-blue)', fontWeight: 600 }}
+            >
+              {showTranscript ? 'Hide' : 'Show'}
             </button>
           </div>
 
-          {showTranscript && (<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{
-                padding: '10px 14px',
-                borderRadius: '8px',
-                backgroundColor: 'var(--accent-blue-soft)',
-                border: '1px solid var(--accent-blue-border)',
-                fontSize: '0.78rem',
-                color: 'var(--accent-blue-hover)'
+          {showTranscript && (
+            <div style={{
+              padding: '14px',
+              backgroundColor: '#FFFFFF',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-light)',
+              fontSize: '0.85rem',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.6,
+              maxHeight: '140px',
+              overflowY: 'auto',
+              whiteSpace: 'pre-line'
             }}>
-                <strong>Summary:</strong> {episode.description}
-              </div>
+              {episode.transcript || episode.description}
+            </div>
+          )}
 
-              <div style={{
-                padding: '12px 14px',
-                borderRadius: '8px',
-                backgroundColor: '#FFFFFF',
-                border: '1px solid var(--border-light)',
-                fontSize: '0.8rem',
-                color: 'var(--text-main)',
-                lineHeight: 1.6,
-                whiteSpace: 'pre-line'
-            }}>
-                {episode.transcript}
-              </div>
-            </div>)}
-        </div>
-
-        {/* Footer */}
-        <div style={{
-            padding: '12px 20px',
-            borderTop: '1px solid var(--border-light)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: '#FFFFFF',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Sparkles size={14} color="#D97706"/>
-            <span>Honest prototype: audio playback &amp; transcripts are simulated locally.</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px' }}>
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+              Uses your browser's audio synthesis engine for natural speech.
+            </span>
+            <button
+              onClick={() => {
+                onMarkCompleted(episode.id);
+                handleClose();
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              <CheckCircle2 size={14} color="var(--color-success)" />
+              <span>Mark Completed</span>
+            </button>
           </div>
-          <button onClick={onClose} className="btn btn-secondary btn-sm">
-            Close
-          </button>
         </div>
       </div>
-    </div>);
+    </div>
+  );
 };

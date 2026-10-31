@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { SCHOOL_CLASS_GROUPS } from '../data/mockData';
 import { Search, GraduationCap, FolderArchive, CheckSquare, ArrowRight } from 'lucide-react';
 export const Classes = ({ classes, onSelectClass, onOpenJoinCodeModal }) => {
     const [filterGroup, setFilterGroup] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const classGroups = [...new Set(['all', ...classes.map(cls => cls.classGroup), ...SCHOOL_CLASS_GROUPS])];
     const filtered = classes.filter(cls => {
-        const matchesGroup = filterGroup === 'all' || cls.classGroup === filterGroup || (cls.studentCount > 32);
+        const matchesGroup = filterGroup === 'all' || cls.classGroup === filterGroup;
         const matchesSearch = cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             cls.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
             cls.teacherName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -24,7 +26,7 @@ export const Classes = ({ classes, onSelectClass, onOpenJoinCodeModal }) => {
             My Enrolled Classes
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Academic subjects and classroom spaces for the SS1 Dynamo &amp; SS1 Horizon pilot stream.
+            Academic subjects and classroom spaces across Primary and Secondary school.
           </p>
         </div>
 
@@ -35,12 +37,8 @@ export const Classes = ({ classes, onSelectClass, onOpenJoinCodeModal }) => {
 
           {/* Filter chips */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-            { id: 'all', label: 'All Pilot Groups' },
-            { id: 'SS1 Dynamo', label: 'SS1 Dynamo' },
-            { id: 'SS1 Horizon', label: 'SS1 Horizon' }
-        ].map(tab => (<button key={tab.id} onClick={() => setFilterGroup(tab.id)} className={`btn btn-sm ${filterGroup === tab.id ? 'btn-primary' : 'btn-secondary'}`} style={{ borderRadius: '999px', fontSize: '0.8rem' }}>
-                {tab.label}
+            {classGroups.map(group => (<button key={group} onClick={() => setFilterGroup(group)} className={`btn btn-sm ${filterGroup === group ? 'btn-primary' : 'btn-secondary'}`} style={{ borderRadius: '999px', fontSize: '0.8rem' }}>
+                {group === 'all' ? 'All School Classes' : group}
               </button>))}
           </div>
         </div>

@@ -9,55 +9,33 @@ export const TeacherDashboard = ({ userProfile, classes, assignments, announceme
             backgroundColor: '#FFFFFF',
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--border-light)',
-            padding: '28px',
+            padding: '24px 28px',
             boxShadow: 'var(--shadow-xs)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '20px',
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #F0FDFA 100%)'
+            gap: '18px'
         }}>
         <div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
-            <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: '#CCFBF1',
-            color: '#0F766E',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '0.74rem',
-            fontWeight: 700
-        }}>
-              <Sparkles size={13}/> Teacher Workspace • SS1 Pilot Stream
-            </div>
-            <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: '#EFF6FF',
-            color: '#2563EB',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '0.74rem',
-            fontWeight: 600,
-            border: '1px solid #BFDBFE'
-        }}>
-              <CheckCircle2 size={13}/> Verified Instructor (Approved by Admin)
-            </div>
+            <span className="badge badge-blue">
+              Teacher Workspace • Whole School
+            </span>
+            <span className="badge badge-green">
+              <CheckCircle2 size={13}/> Verified Instructor (Admin Approved)
+            </span>
           </div>
           <h2 style={{
-            fontSize: '1.75rem',
+            fontSize: '1.65rem',
             fontWeight: 800,
-            color: 'var(--primary-navy)',
-            letterSpacing: '-0.03em',
+            color: 'var(--text-main)',
+            letterSpacing: '-0.02em',
             lineHeight: 1.2
         }}>
-            Welcome, {userProfile.name} 📚
+            Welcome, {userProfile.name}
           </h2>
-          <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
             Lead Instructor for <strong>Mathematics &amp; Physics</strong> (SS1 Dynamo). You have <strong>{submissions.filter(s => s.status === 'Pending Review').length} submissions</strong> awaiting review.
           </p>
         </div>

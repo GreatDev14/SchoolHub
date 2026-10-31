@@ -46,9 +46,9 @@ export const SearchModal = ({ isOpen, onClose, classes, assignments, announcemen
         {/* Results Area */}
         <div style={{ maxHeight: '380px', overflowY: 'auto', padding: '16px' }}>
           {!query ? (<div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              <p style={{ fontSize: '0.9rem', marginBottom: '8px' }}>Type a keyword to search across the School Hub pilot.</p>
+              <p style={{ fontSize: '0.9rem', marginBottom: '8px' }}>Type a keyword to search across the whole School Hub.</p>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {['Mathematics', 'Physics', 'Linear Equations', 'Exam', 'SS1 Dynamo'].map(keyword => (<button key={keyword} onClick={() => setQuery(keyword)} style={{
+                {['Mathematics', 'Physics', 'Linear Equations', 'Primary 5', 'SS1', 'Exam'].map(keyword => (<button key={keyword} onClick={() => setQuery(keyword)} style={{
                     fontSize: '0.78rem',
                     padding: '4px 10px',
                     backgroundColor: 'var(--bg-card-subtle)',
@@ -62,7 +62,7 @@ export const SearchModal = ({ isOpen, onClose, classes, assignments, announcemen
             </div>) : totalResults === 0 ? (<div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--text-secondary)' }}>
               <p style={{ fontWeight: 600 }}>No results found for "{query}"</p>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Try searching for a subject like "Math" or a class group like "SS1 Dynamo".
+                Try searching for a subject like "Math" or a class group like "Primary 5" or "SS2".
               </p>
             </div>) : (<div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {/* Classes */}

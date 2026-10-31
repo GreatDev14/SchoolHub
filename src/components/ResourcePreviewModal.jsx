@@ -76,7 +76,20 @@ export const ResourcePreviewModal = ({ resource, onClose }) => {
           </span>
 
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={() => alert(`[Prototype Notice] In this front-end demo, downloading "${resource.title}" is simulated.`)} className="btn btn-secondary btn-sm">
+            <button onClick={() => {
+              const safeTitle = resource.title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+              const extension = 'txt';
+              const content = `School Hub Resource\n\n${resource.title}\n${resource.subject} • ${resource.classGroup}\n\n${resource.description}\n\nThis downloadable demo file is generated locally in your browser.`;
+              const blob = new Blob([content], { type: 'text/plain' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `${safeTitle}.${extension}`;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              URL.revokeObjectURL(url);
+            }} className="btn btn-secondary btn-sm">
               <Download size={14}/>
               <span>Download File</span>
             </button>

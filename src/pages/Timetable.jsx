@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, User } from 'lucide-react';
+import { SCHOOL_CLASS_GROUPS } from '../data/mockData';
 export const Timetable = ({ timetable, calendarEvents, initialClassGroup = 'SS1 Dynamo' }) => {
     const [activeTab, setActiveTab] = useState('lessons');
     const [selectedDay, setSelectedDay] = useState('Wednesday');
@@ -20,7 +21,7 @@ export const Timetable = ({ timetable, calendarEvents, initialClassGroup = 'SS1 
             Timetable &amp; Academic Calendar
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Day-student lesson periods, room schedules, Continuous Assessment dates, and term deadlines.
+            School lesson periods, room schedules, assessments, events, and term deadlines.
           </p>
         </div>
 
@@ -61,9 +62,9 @@ export const Timetable = ({ timetable, calendarEvents, initialClassGroup = 'SS1 
           {/* Stream Filter & Day Switcher Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Pilot Stream:</span>
-              {['SS1 Dynamo', 'SS1 Horizon', 'all'].map(grp => (<button key={grp} onClick={() => setSelectedGroup(grp)} className={`btn btn-sm ${selectedGroup === grp ? 'btn-primary' : 'btn-secondary'}`} style={{ borderRadius: '999px', fontSize: '0.78rem' }}>
-                  {grp === 'all' ? 'All Streams' : grp}
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>School Class:</span>
+              {[...SCHOOL_CLASS_GROUPS, 'all'].map(grp => (<button key={grp} onClick={() => setSelectedGroup(grp)} className={`btn btn-sm ${selectedGroup === grp ? 'btn-primary' : 'btn-secondary'}`} style={{ borderRadius: '999px', fontSize: '0.78rem' }}>
+                  {grp === 'all' ? 'All Classes' : grp}
                 </button>))}
             </div>
 
@@ -124,7 +125,7 @@ export const Timetable = ({ timetable, calendarEvents, initialClassGroup = 'SS1 
                   {selectedDay} Schedule ({currentLessons.length} Lessons)
                 </h3>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  Showing stream: <strong>{selectedGroup === 'all' ? 'Combined Pilot' : selectedGroup}</strong>
+                  Showing class: <strong>{selectedGroup === 'all' ? 'All School Classes' : selectedGroup}</strong>
                 </span>
               </div>
 

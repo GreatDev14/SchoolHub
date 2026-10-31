@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
 import { RefreshCw, LogOut, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { SCHOOL_CLASS_GROUPS } from '../data/mockData';
 export const ProfileSettings = ({ userProfile, onUpdateProfile, onSwitchRole, onResetData, onSignOut }) => {
     const [displayName, setDisplayName] = useState(userProfile.name);
+    const [classGroup, setClassGroup] = useState(userProfile.classGroup || 'SS1 Dynamo');
     const [isSaved, setIsSaved] = useState(false);
     // Demo toggles
-    const [emailAlerts, setEmailAlerts] = useState(true);
-    const [assignmentReminders, setAssignmentReminders] = useState(true);
-    const [discussionNotifs, setDiscussionNotifs] = useState(false);
-    const [reducedMotion, setReducedMotion] = useState(false);
+    const [emailAlerts, setEmailAlerts] = useState(userProfile.preferences?.emailAlerts ?? true);
+    const [assignmentReminders, setAssignmentReminders] = useState(userProfile.preferences?.assignmentReminders ?? true);
+    const [discussionNotifs, setDiscussionNotifs] = useState(userProfile.preferences?.discussionNotifs ?? false);
+    const savePreferences = (patch) => {
+        onUpdateProfile({ preferences: { ...(userProfile.preferences || {}), ...patch } });
+    };
     const handleSaveProfile = (e) => {
         e.preventDefault();
         if (!displayName.trim())
             return;
         onUpdateProfile({
             name: displayName.trim(),
+            classGroup,
+            roleTitle: userProfile.role === 'student' ? `Day Student • ${classGroup}` : userProfile.roleTitle,
             avatarInitials: displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
         });
         setIsSaved(true);
@@ -88,6 +94,13 @@ export const ProfileSettings = ({ userProfile, onUpdateProfile, onSwitchRole, on
             </span>
           </div>
 
+          {userProfile.role === 'student' && (<div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">School Class</label>
+            <select className="form-select" value={classGroup} onChange={e => setClassGroup(e.target.value)}>
+              {SCHOOL_CLASS_GROUPS.map(group => <option key={group}>{group}</option>)}
+            </select>
+            <span className="form-hint">Controls which school class is shown throughout the student experience.</span>
+          </div>)}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
             <button type="submit" className="btn btn-primary btn-sm">
               Save Display Name
@@ -112,7 +125,7 @@ export const ProfileSettings = ({ userProfile, onUpdateProfile, onSwitchRole, on
                 Show banner notifications 24 hours prior to homework deadlines
               </div>
             </div>
-            <input type="checkbox" checked={assignmentReminders} onChange={(e) => setAssignmentReminders(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent-blue)' }}/>
+            <input type="checkbox" checked={assignmentReminders} onChange={(e) => { setAssignmentReminders(e.target.checked); savePreferences({ assignmentReminders: e.target.checked }); }} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent-blue)' }}/>
           </label>
 
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
@@ -124,7 +137,7 @@ export const ProfileSettings = ({ userProfile, onUpdateProfile, onSwitchRole, on
                 Morning notification highlighting today's scheduled lesson rooms
               </div>
             </div>
-            <input type="checkbox" checked={emailAlerts} onChange={(e) => setEmailAlerts(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent-blue)' }}/>
+            <input type="checkbox" checked={emailAlerts} onChange={(e) => { setEmailAlerts(e.target.checked); savePreferences({ emailAlerts: e.target.checked }); }} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent-blue)' }}/>
           </label>
 
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
@@ -136,7 +149,7 @@ export const ProfileSettings = ({ userProfile, onUpdateProfile, onSwitchRole, on
                 Notify when a teacher or classmate responds to your study question
               </div>
             </div>
-            <input type="checkbox" checked={discussionNotifs} onChange={(e) => setDiscussionNotifs(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent-blue)' }}/>
+            <input type="checkbox" checked={discussionNotifs} onChange={(e) => { setDiscussionNotifs(e.target.checked); savePreferences({ discussionNotifs: e.target.checked }); }} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--accent-blue)' }}/>
           </label>
         </div>
       </div>

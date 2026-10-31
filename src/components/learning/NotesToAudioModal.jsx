@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Mic, Sparkles, Play, Pause, CheckCircle2, UploadCloud } from 'lucide-react';
+import { SCHOOL_CLASS_GROUPS } from '../../data/mockData';
 export const NotesToAudioModal = ({ isOpen, onClose, onPublish, defaultTeacherName = 'Mr. Babatunde Alabi' }) => {
     const [title, setTitle] = useState('');
     const [subject, setSubject] = useState('Mathematics');
@@ -112,8 +113,7 @@ export const NotesToAudioModal = ({ isOpen, onClose, onPublish, defaultTeacherNa
                 <div>
                   <label className="form-label">Class Group *</label>
                   <select value={classGroup} onChange={e => setClassGroup(e.target.value)} className="form-select">
-                    <option value="SS1 Dynamo">SS1 Dynamo</option>
-                    <option value="SS1 Horizon">SS1 Horizon</option>
+                    {SCHOOL_CLASS_GROUPS.map(group => <option key={group}>{group}</option>)}
                   </select>
                 </div>
 
@@ -205,18 +205,40 @@ export const NotesToAudioModal = ({ isOpen, onClose, onPublish, defaultTeacherNa
                 </button>
               </div>
 
-              {/* In-modal player preview */}
-              <div style={{ padding: '16px 20px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-light)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--primary-navy)' }}>{title}</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{subject} • {defaultTeacherName} • Voice: {voicePersona}</div>
-                  </div>
-                  <button onClick={() => setIsPreviewPlaying(!isPreviewPlaying)} className="btn btn-primary" style={{ width: '40px', height: '40px', borderRadius: '50%', padding: 0 }}>
-                    {isPreviewPlaying ? <Pause size={18} style={{ fill: '#FFFFFF' }}/> : <Play size={18} style={{ fill: '#FFFFFF', marginLeft: '2px' }}/>}
-                  </button>
+            {/* In-modal player preview */}
+            <div style={{ padding: '16px 20px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card-subtle)', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-main)' }}>{title}</div>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{subject} • {defaultTeacherName} • Voice: {voicePersona}</div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && window.speechSynthesis) {
+                      if (isPreviewPlaying) {
+                        window.speechSynthesis.cancel();
+                        setIsPreviewPlaying(false);
+                      } else {
+                        window.speechSynthesis.cancel();
+                        const utter = new SpeechSynthesisUtterance(notesText);
+                        utter.onend = () => setIsPreviewPlaying(false);
+                        utter.onerror = () => setIsPreviewPlaying(false);
+                        window.speechSynthesis.speak(utter);
+                        setIsPreviewPlaying(true);
+                      }
+                    } else {
+                      setIsPreviewPlaying(!isPreviewPlaying);
+                    }
+                  }}
+                  className="btn btn-primary"
+                  style={{ width: '40px', height: '40px', borderRadius: '50%', padding: 0 }}
+                  title={isPreviewPlaying ? 'Pause voice preview' : 'Play voice preview'}
+                >
+                  {isPreviewPlaying ? <Pause size={18} /> : <Play size={18} style={{ marginLeft: '2px' }} />}
+                </button>
               </div>
+            </div>
 
               {/* Transcript */}
               <div>

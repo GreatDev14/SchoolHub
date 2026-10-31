@@ -26,6 +26,12 @@ export const DEMO_PROFILES = {
         avatarInitials: 'CN'
     }
 };
+export const SCHOOL_CLASS_GROUPS = [
+    'Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5', 'Primary 6',
+    'JSS1', 'JSS2', 'JSS3', 'SS1', 'SS2', 'SS3',
+    'SS1 Dynamo', 'SS1 Horizon'
+];
+
 export const INITIAL_CLASSES = [
     {
         id: 'cls-math-dyn',
@@ -116,6 +122,48 @@ export const INITIAL_CLASSES = [
         studentCount: 64,
         colorAccent: '#EC4899',
         description: 'Democratic values, rule of law, human rights advocacy, responsible citizenship, and community governance.'
+    },
+    {
+        id: 'cls-english-pri5', name: 'English Studies', code: 'ENG-PR5', classGroup: 'Primary 5',
+        teacherName: 'Mrs. Toyin Bello', teacherEmail: 't.bello@demo.schoolhub.local', room: 'Primary Block A',
+        schedule: 'Mon & Wed • 8:30 AM - 9:30 AM', resourceCount: 6, assignmentCount: 1, studentCount: 28,
+        colorAccent: '#7C3AED', description: 'Reading comprehension, grammar, spelling, composition and oral English for Primary 5.'
+    },
+    {
+        id: 'cls-math-pri5', name: 'Mathematics', code: 'MTH-PR5', classGroup: 'Primary 5',
+        teacherName: 'Mr. Samuel Eze', teacherEmail: 's.eze@demo.schoolhub.local', room: 'Primary Block A',
+        schedule: 'Tue & Thu • 8:30 AM - 9:30 AM', resourceCount: 5, assignmentCount: 1, studentCount: 28,
+        colorAccent: '#F59E0B', description: 'Whole numbers, fractions, decimals, measurement and basic geometry for Primary 5.'
+    },
+    {
+        id: 'cls-basic-jss1', name: 'Basic Science', code: 'BSC-JS1', classGroup: 'JSS1',
+        teacherName: 'Mrs. Ruth Ekanem', teacherEmail: 'r.ekanem@demo.schoolhub.local', room: 'Science Block 3',
+        schedule: 'Mon & Fri • 9:00 AM - 10:20 AM', resourceCount: 7, assignmentCount: 2, studentCount: 34,
+        colorAccent: '#16845B', description: 'Living and non-living things, energy, materials, health education and introductory environmental science.'
+    },
+    {
+        id: 'cls-social-jss2', name: 'Social Studies', code: 'SST-JS2', classGroup: 'JSS2',
+        teacherName: 'Mr. Musa Bello', teacherEmail: 'm.bello@demo.schoolhub.local', room: 'Humanities Block 2',
+        schedule: 'Tue & Thu • 10:30 AM - 11:50 AM', resourceCount: 5, assignmentCount: 1, studentCount: 36,
+        colorAccent: '#EC4899', description: 'Culture, family, institutions, community development, citizenship and Nigerian society.'
+    },
+    {
+        id: 'cls-eng-jss3', name: 'English Language', code: 'ENG-JS3', classGroup: 'JSS3',
+        teacherName: 'Mrs. Funke Adewale', teacherEmail: 'f.adewale@demo.schoolhub.local', room: 'Humanities Block 1',
+        schedule: 'Mon & Thu • 8:30 AM - 9:50 AM', resourceCount: 8, assignmentCount: 2, studentCount: 38,
+        colorAccent: '#356AE6', description: 'Junior secondary comprehension, summary, grammar, speech work and essay preparation.'
+    },
+    {
+        id: 'cls-econ-ss2', name: 'Economics', code: 'ECO-SS2', classGroup: 'SS2',
+        teacherName: 'Mr. David Oloyede', teacherEmail: 'd.oloyede@demo.schoolhub.local', room: 'Business Studies Room 4',
+        schedule: 'Mon & Wed • 11:45 AM - 1:05 PM', resourceCount: 6, assignmentCount: 1, studentCount: 40,
+        colorAccent: '#0EA5E9', description: 'Demand and supply, production, markets, national income and economic development.'
+    },
+    {
+        id: 'cls-gov-ss3', name: 'Government', code: 'GOV-SS3', classGroup: 'SS3',
+        teacherName: 'Mrs. Grace Okafor', teacherEmail: 'g.okafor@demo.schoolhub.local', room: 'Humanities Block 3',
+        schedule: 'Tue & Fri • 10:15 AM - 11:35 AM', resourceCount: 7, assignmentCount: 2, studentCount: 42,
+        colorAccent: '#8B5CF6', description: 'Government institutions, constitutional development, political systems and international relations.'
     }
 ];
 export const INITIAL_ASSIGNMENTS = [

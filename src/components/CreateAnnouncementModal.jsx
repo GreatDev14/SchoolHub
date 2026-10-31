@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { SCHOOL_CLASS_GROUPS } from '../data/mockData';
 export const CreateAnnouncementModal = ({ isOpen, onClose, authorName, authorRole, onCreate }) => {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('Class Update');
@@ -74,9 +75,8 @@ export const CreateAnnouncementModal = ({ isOpen, onClose, authorName, authorRol
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Target Audience / Stream</label>
               <select className="form-select" value={classGroup} onChange={(e) => setClassGroup(e.target.value)}>
-                <option value="SS1 Dynamo">SS1 Dynamo Only</option>
-                <option value="SS1 Horizon">SS1 Horizon Only</option>
-                <option value="All Classes">All Pilot Students (Combined)</option>
+                <option value="All Classes">All School Classes</option>
+                {SCHOOL_CLASS_GROUPS.map(group => <option key={group} value={group}>{group} Only</option>)}
               </select>
             </div>
           </div>

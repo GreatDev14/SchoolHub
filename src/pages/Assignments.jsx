@@ -34,7 +34,7 @@ export const Assignments = ({ assignments, onSelectAssignment }) => {
           Assignments &amp; Class Tasks
         </h2>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-          View deadlines, download exercise guidelines, and submit completed coursework for SS1 pilot subjects.
+          View deadlines, download exercise guidelines, and submit completed coursework across your school classes.
         </p>
       </div>
 

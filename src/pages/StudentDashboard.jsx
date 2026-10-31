@@ -69,58 +69,36 @@ export const StudentDashboard = ({ userProfile, classes, assignments, announceme
             backgroundColor: '#FFFFFF',
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--border-light)',
-            padding: '28px',
+            padding: '24px 28px',
             boxShadow: 'var(--shadow-xs)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '20px',
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #F8FAFD 100%)'
+            gap: '18px'
         }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-            <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: 'var(--accent-blue-soft)',
-            color: 'var(--accent-blue)',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '0.74rem',
-            fontWeight: 700
-        }}>
-              <Sparkles size={13}/> {userProfile.classGroup || 'SS1 Dynamo'} • Day Student Pilot
-            </div>
+            <span className="badge badge-blue">
+              {userProfile.classGroup || 'SS1 Dynamo'} • Day Student Pilot
+            </span>
 
-            <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: '#FEF3C7',
-            color: '#92400E',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '0.74rem',
-            fontWeight: 700,
-            border: '1px solid #FDE68A'
-        }}>
-              🔥 5-Day Study Streak
-            </div>
+            <span className="badge badge-amber">
+              Active Study Streak • 5 Days
+            </span>
           </div>
 
           <h2 style={{
-            fontSize: '1.75rem',
+            fontSize: '1.65rem',
             fontWeight: 800,
-            color: 'var(--primary-navy)',
-            letterSpacing: '-0.03em',
+            color: 'var(--text-main)',
+            letterSpacing: '-0.02em',
             lineHeight: 1.2
         }}>
             Good morning, {userProfile.name.split(' ')[0]} 👋
           </h2>
           <p style={{
-            fontSize: '0.92rem',
+            fontSize: '0.88rem',
             color: 'var(--text-secondary)',
             marginTop: '4px'
         }}>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { SCHOOL_CLASS_GROUPS } from '../data/mockData';
 export const CreateAssignmentModal = ({ isOpen, onClose, teacherName, onCreate }) => {
     const [title, setTitle] = useState('');
     const [subject, setSubject] = useState('Mathematics');
@@ -82,8 +83,7 @@ export const CreateAssignmentModal = ({ isOpen, onClose, teacherName, onCreate }
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">Class Stream</label>
               <select className="form-select" value={classGroup} onChange={(e) => setClassGroup(e.target.value)}>
-                <option value="SS1 Dynamo">SS1 Dynamo</option>
-                <option value="SS1 Horizon">SS1 Horizon</option>
+                {SCHOOL_CLASS_GROUPS.map(group => <option key={group}>{group}</option>)}
               </select>
             </div>
           </div>

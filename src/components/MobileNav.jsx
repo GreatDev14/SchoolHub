@@ -41,7 +41,7 @@ export const MobileNav = ({ currentPage, onNavigate, isOpen, onClose, userProfil
                   School Hub
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  Pilot SS1 Dynamo &amp; Horizon
+                  Primary &amp; Secondary School
                 </div>
               </div>
               <button onClick={onClose} aria-label="Close menu" style={{

@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { BookOpen, Eye, EyeOff, ArrowRight, ShieldAlert } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 export const DemoSignIn = ({ onSignInSuccess, onBackToWelcome }) => {
     const [selectedRole, setSelectedRole] = useState('student');
-    const [identifier, setIdentifier] = useState('ada.okonkwo@demo.schoolhub.local');
-    const [password, setPassword] = useState('demo-pilot-2026');
+    const [identifier, setIdentifier] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [mode, setMode] = useState('signin');
+    const [fullName, setFullName] = useState('');
+    const [schoolCode, setSchoolCode] = useState('SHS-IUS-2026');
+    const [classCode, setClassCode] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const roleCredentials = {
         student: {
@@ -25,22 +30,75 @@ export const DemoSignIn = ({ onSignInSuccess, onBackToWelcome }) => {
     };
     const handleRoleSelect = (role) => {
         setSelectedRole(role);
-        setIdentifier(roleCredentials[role].id);
-        setPassword('demo-pilot-2026');
+        setPassword('');
         setErrorMsg('');
     };
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMsg('');
         if (!identifier.trim()) {
-            setErrorMsg('Please provide a demo username or email address.');
+            setErrorMsg('Please provide your email address.');
             return;
         }
         if (!password.trim()) {
-            setErrorMsg('Please enter a demo password.');
+            setErrorMsg('Please enter your password.');
             return;
         }
-        // Success in demo prototype
+        if (mode === 'signup') {
+            if (!fullName.trim()) {
+                setErrorMsg('Please enter your full name.');
+                return;
+            }
+            if (!schoolCode.trim()) {
+                setErrorMsg('Please enter your school code.');
+                return;
+            }
+            if (selectedRole === 'student' && !classCode.trim()) {
+                setErrorMsg('Please enter your class code.');
+                return;
+            }
+            const { error } = await supabase.auth.signUp({
+                email: identifier.trim(),
+                password,
+                options: {
+                    data: {
+                        full_name: fullName.trim(),
+                        school_code: schoolCode.trim().toUpperCase(),
+                        class_code: classCode.trim().toUpperCase(),
+                        requested_role: selectedRole === 'teacher' ? 'teacher' : 'student'
+                    }
+                }
+            });
+            if (error) {
+                setErrorMsg(error.message);
+            } else {
+                setErrorMsg(selectedRole === 'teacher'
+                    ? 'Account created. Your teacher access is pending administrator approval.'
+                    : 'Account created. Check your email if confirmation is required, then sign in.');
+                setMode('signin');
+            }
+            return;
+        }
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: identifier.trim(),
+            password
+        });
+        if (error) {
+            setErrorMsg(error.message);
+            return;
+        }
         onSignInSuccess(selectedRole);
+    };
+
+    const handlePasswordReset = async () => {
+        if (!identifier.includes('@')) {
+            setErrorMsg('Enter your email address before requesting a password reset.');
+            return;
+        }
+        const { error } = await supabase.auth.resetPasswordForEmail(identifier.trim(), {
+            redirectTo: `${window.location.origin}/reset-password`
+        });
+        setErrorMsg(error ? error.message : 'Password reset email sent. Check your inbox.');
     };
     return (<div style={{
             minHeight: '100vh',
@@ -98,23 +156,28 @@ export const DemoSignIn = ({ onSignInSuccess, onBackToWelcome }) => {
           </p>
         </div>
 
-        {/* Demo Role Switcher Tabs */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '16px' }}>
+          <button type="button" onClick={() => { setMode('signin'); setErrorMsg(''); }} className="btn btn-sm" style={{ background: mode === 'signin' ? 'var(--primary-navy)' : 'var(--bg-card-subtle)', color: mode === 'signin' ? '#fff' : 'var(--text-secondary)' }}>Sign In</button>
+          <button type="button" onClick={() => { setMode('signup'); setErrorMsg(''); }} className="btn btn-sm" style={{ background: mode === 'signup' ? 'var(--primary-navy)' : 'var(--bg-card-subtle)', color: mode === 'signup' ? '#fff' : 'var(--text-secondary)' }}>Create Account</button>
+        </div>
+
+        {/* Account type */}
         <div style={{ marginBottom: '20px' }}>
           <label className="form-label" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-            CHOOSE DEMO PERSONA:
+            ACCOUNT TYPE:
           </label>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: mode === 'signup' ? 'repeat(2, 1fr)' : '1fr',
             gap: '6px',
             backgroundColor: 'var(--bg-card-subtle)',
             padding: '4px',
             borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--border-light)'
         }}>
-            {['student', 'teacher', 'admin'].map((role) => {
+            {(mode === 'signup' ? ['student', 'teacher'] : ['student']).map((role) => {
             const isSelected = selectedRole === role;
-            const labels = { student: 'Student', teacher: 'Teacher', admin: 'Admin' };
+            const labels = { student: 'Student', teacher: 'Teacher' };
             return (<button key={role} type="button" onClick={() => handleRoleSelect(role)} style={{
                     padding: '8px 4px',
                     borderRadius: '6px',
@@ -142,8 +205,8 @@ export const DemoSignIn = ({ onSignInSuccess, onBackToWelcome }) => {
             alignItems: 'center',
             justifyContent: 'space-between'
         }}>
-            <span>Active: <strong>{roleCredentials[selectedRole].name}</strong></span>
-            <span style={{ fontSize: '0.7rem', opacity: 0.85 }}>({roleCredentials[selectedRole].title.split('•')[0].trim()})</span>
+            <span>{mode === 'signup' ? 'Creating' : 'Signing in as'}: <strong>{selectedRole === 'teacher' ? 'Teacher' : 'Student'}</strong></span>
+            <span style={{ fontSize: '0.7rem', opacity: 0.85 }}>Verified account</span>
           </div>
         </div>
 
@@ -161,24 +224,32 @@ export const DemoSignIn = ({ onSignInSuccess, onBackToWelcome }) => {
               {errorMsg}
             </div>)}
 
+          {mode === 'signup' && (<>
+            <div className="form-group"><label className="form-label">Full Name</label><input className="form-input" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" /></div>
+            <div className="form-group"><label className="form-label">School Code</label><input className="form-input" value={schoolCode} onChange={(e) => setSchoolCode(e.target.value.toUpperCase())} placeholder="SHS-IUS-2026" /></div>
+            {selectedRole === 'student' && <div className="form-group"><label className="form-label">Class Code</label><input className="form-input" value={classCode} onChange={(e) => setClassCode(e.target.value.toUpperCase())} placeholder="e.g. IUS-SS1-DYN-2026" /></div>}
+          </>)}
           <div className="form-group">
-            <label className="form-label">Email or Demo Username</label>
-            <input type="text" className="form-input" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="e.g. ada.okonkwo@demo.schoolhub.local"/>
+            <label className="form-label">Email Address</label>
+            <input type="email" className="form-input" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@school.edu"/>
           </div>
 
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label className="form-label">Demo Password</label>
+              <label className="form-label">Password</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="button" onClick={handlePasswordReset} style={{ fontSize: '0.75rem', color: 'var(--accent-blue)' }}>Forgot password?</button>
               <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ fontSize: '0.75rem', color: 'var(--accent-blue)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                 {showPassword ? <EyeOff size={13}/> : <Eye size={13}/>}
                 <span>{showPassword ? 'Hide' : 'Show'}</span>
               </button>
+              </div>
             </div>
             <input type={showPassword ? 'text' : 'password'} className="form-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password"/>
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px' }}>
-            <span>Enter as {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}</span>
+            <span>Sign In Securely</span>
             <ArrowRight size={16}/>
           </button>
         </form>
@@ -198,7 +269,7 @@ export const DemoSignIn = ({ onSignInSuccess, onBackToWelcome }) => {
         }}>
           <ShieldAlert size={16} color="#64748B" style={{ flexShrink: 0, marginTop: '2px' }}/>
           <div>
-            <strong>Demonstration Role Switcher:</strong> This prototype simulates role permissions for preview purposes. No real passwords are collected or sent to any server.
+            <strong>Secure account access:</strong> Your school, class, and dashboard permissions are verified by School Hub’s authenticated backend.
           </div>
         </div>
       </div>

@@ -19,7 +19,7 @@ export const Announcements = ({ announcements, onOpenAnnouncement, onMarkAllAsRe
             School &amp; Class Announcements
           </h2>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Official notices, timetables, academic updates, and pilot communications.
+            Official notices, timetables, academic updates, and school-wide communications.
           </p>
         </div>
 

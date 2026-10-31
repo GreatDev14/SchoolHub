@@ -38,7 +38,7 @@ export const Welcome = ({ onExploreDemo, onGoToSignIn, onSelectRoleAndEnter }) =
             borderRadius: '999px',
             fontWeight: 700
         }}>
-              PILOT PREVIEW
+              SCHOOL PREVIEW
             </span>
           </div>
         </div>
@@ -69,7 +69,7 @@ export const Welcome = ({ onExploreDemo, onGoToSignIn, onSelectRoleAndEnter }) =
             fontSize: '0.82rem',
             fontWeight: 700
         }}>
-            <Sparkles size={14}/> Initial Day-Student Pilot • SS1 Dynamo &amp; SS1 Horizon
+            <Sparkles size={14}/> Primary &amp; Secondary School • All Classes
           </div>
         </div>
 
@@ -135,7 +135,7 @@ export const Welcome = ({ onExploreDemo, onGoToSignIn, onSelectRoleAndEnter }) =
                 Test Sample Personas Directly:
               </span>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                Select a fictional pilot account to enter the prototype immediately without typing credentials:
+                Select a fictional school account to enter the prototype immediately without typing credentials:
               </p>
             </div>
             <span style={{
@@ -313,7 +313,7 @@ export const Welcome = ({ onExploreDemo, onGoToSignIn, onSelectRoleAndEnter }) =
               My Classes &amp; Notes
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              Dedicated class hubs for SS1 Dynamo and SS1 Horizon subjects with classwork, resources, and moderated discussion.
+              Dedicated subject hubs for Primary and Secondary classes with classwork, resources, and moderated discussion.
             </p>
           </div>
 
@@ -394,7 +394,7 @@ export const Welcome = ({ onExploreDemo, onGoToSignIn, onSelectRoleAndEnter }) =
             Prototype Preview — Sample Information Only
           </p>
           <p>
-            This visual mockup is built to evaluate the School Hub user experience for SS1 Dynamo and SS1 Horizon.
+            This visual mockup demonstrates School Hub across Primary and Secondary classes. Official school data and branding can be added when supplied.
             No official school endorsement, real student credentials, or live database storage is represented.
           </p>
         </div>

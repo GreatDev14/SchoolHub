@@ -98,7 +98,7 @@ export const Sidebar = ({ currentPage, onNavigate, userProfile, onSignOut, unrea
             color: 'var(--text-secondary)',
             fontWeight: 500
         }}>
-              Pilot SS1 • Dynamo &amp; Horizon
+              Primary • Junior • Senior Secondary
             </div>
           </div>
         </div>
